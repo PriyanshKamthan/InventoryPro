@@ -29,6 +29,7 @@ public class SaleService {
     @Autowired
     private StockMovementService stockMovementService;
 
+    // add sale method
     @Transactional
     public Sale addSale(Sale sale) {
         double totalAmount = 0.0;
