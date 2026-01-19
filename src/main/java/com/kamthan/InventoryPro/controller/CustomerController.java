@@ -60,4 +60,18 @@ public class CustomerController {
                 null
         );
     }
+
+    @GetMapping("/search")
+    public ApiResponse<List<Customer>> searchCustomers(
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "phone", required = false) String phone,
+            @RequestParam(value = "email", required = false) String email,
+            @RequestParam(value = "gstNumber", required = false) String gstNumber) {
+
+        return new ApiResponse<>(
+                true,
+                "Customers fetched successfully",
+                customerService.searchCustomers(name, phone, email, gstNumber)
+        );
+    }
 }

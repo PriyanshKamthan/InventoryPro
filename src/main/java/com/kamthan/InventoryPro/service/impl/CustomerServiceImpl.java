@@ -48,4 +48,21 @@ public class CustomerServiceImpl implements CustomerService {
         getCustomerById(id);
         customerRepository.deleteById(id);
     }
+
+    @Override
+    public List<Customer> searchCustomers(String name, String phone, String email, String gstNumber) {
+        if (name != null && !name.isBlank()) {
+            return customerRepository.findByNameContainingIgnoreCase(name);
+        }
+        if (email != null && !email.isBlank()) {
+            return customerRepository.findByEmailContainingIgnoreCase(email);
+        }
+        if (gstNumber != null && !gstNumber.isBlank()) {
+            return customerRepository.findByGstNumberContainingIgnoreCase(gstNumber);
+        }
+        if (phone != null && !phone.isBlank()) {
+            return customerRepository.findByPhoneContaining(phone);
+        }
+        return getAllCustomers();
+    }
 }
