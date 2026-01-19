@@ -46,7 +46,7 @@ public class SupplierController {
     public ApiResponse<Supplier> getSupplierById(@PathVariable Long id) {
         return new ApiResponse<>(
                 true,
-                "Supplier details fetched",
+                "Supplier details fetched successfully",
                 supplierService.getSupplierById(id)
         );
     }
@@ -58,6 +58,19 @@ public class SupplierController {
                 true,
                 "Supplier deleted successfully",
                 null
+        );
+    }
+
+    @GetMapping("/search")
+    public ApiResponse<List<Supplier>> searchSuppliers(
+            @RequestParam(name = "name", required = false) String name,
+            @RequestParam(name = "phone", required = false) String phone,
+            @RequestParam(name = "email", required = false) String email,
+            @RequestParam(name = "gstNumber", required = false) String gstNumber) {
+        return new ApiResponse<>(
+                true,
+                "Suppliers fetched successfully",
+                supplierService.searchSuppliers(name, phone, email, gstNumber)
         );
     }
 }

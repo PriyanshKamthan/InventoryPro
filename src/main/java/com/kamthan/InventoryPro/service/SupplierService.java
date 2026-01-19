@@ -10,4 +10,5 @@ public interface SupplierService {
     Supplier getSupplierById(Long id);
     public Supplier updateSupplier(Long id, Supplier updatedSupplier);
     void deleteSupplier(Long id);
+    List<Supplier> searchSuppliers(String name, String phone, String email, String gstNumber);
 }

@@ -22,8 +22,6 @@ public class Supplier {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
-    // Getters, setters, constructors
-
 
     public Supplier() {
     }

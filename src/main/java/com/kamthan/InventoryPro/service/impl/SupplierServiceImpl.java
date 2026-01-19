@@ -49,4 +49,21 @@ public class SupplierServiceImpl implements SupplierService {
         getSupplierById(id);
         supplierRepository.deleteById(id);
     }
+
+    @Override
+    public List<Supplier> searchSuppliers(String name, String phone, String email, String gstNumber) {
+        if(name!=null && !name.isBlank()) {
+            return supplierRepository.findByNameContainingIgnoreCase(name);
+        }
+        if(phone!=null && !phone.isBlank()) {
+            return supplierRepository.findByPhoneContaining(phone);
+        }
+        if(email!=null && !email.isBlank()) {
+            return supplierRepository.findByEmailContainingIgnoreCase(email);
+        }
+        if(gstNumber!=null && !gstNumber.isBlank()) {
+            return supplierRepository.findByGstNumberContainingIgnoreCase(gstNumber);
+        }
+        return getAllSuppliers();
+    }
 }
