@@ -1,13 +1,12 @@
 package com.kamthan.InventoryPro.service;
 
-import com.kamthan.InventoryPro.dto.PurchaseItemResponseDTO;
 import com.kamthan.InventoryPro.dto.PurchaseResponseDTO;
 import com.kamthan.InventoryPro.exception.InvalidRequestException;
 import com.kamthan.InventoryPro.exception.ResourceNotFoundException;
+import com.kamthan.InventoryPro.mapper.PurchaseMapper;
 import com.kamthan.InventoryPro.model.Product;
 import com.kamthan.InventoryPro.model.Purchase;
 import com.kamthan.InventoryPro.model.PurchaseItem;
-import com.kamthan.InventoryPro.model.StockMovement;
 import com.kamthan.InventoryPro.model.enums.MovementType;
 import com.kamthan.InventoryPro.model.enums.ReferenceType;
 import com.kamthan.InventoryPro.repository.ProductRepository;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +25,8 @@ import java.util.Map;
 public class PurchaseService {
     @Autowired
     private PurchaseRepository purchaseRepository;
+    @Autowired
+    private PurchaseMapper purchaseMapper;
     @Autowired
     private ProductRepository productRepository;
     @Autowired
@@ -136,35 +136,9 @@ public class PurchaseService {
         }
 
         return purchases.stream()
-                .map(this::mapToPurchaseResponseDTO)
+                .map(purchaseMapper::toResponseDTO)
                 .toList();
     }
 
-    private PurchaseResponseDTO mapToPurchaseResponseDTO(Purchase purchase) {
-        PurchaseResponseDTO dto = new PurchaseResponseDTO();
 
-        dto.setPurchaseId(purchase.getId());
-        dto.setPurchaseDate(purchase.getPurchaseDate());
-        dto.setTotalAmount(purchase.getTotalAmount());
-        dto.setTotalTax(purchase.getTaxAmount());
-
-        if (purchase.getSupplier() != null) {
-            dto.setSupplierName(purchase.getSupplier().getName());
-        }
-
-        List<PurchaseItemResponseDTO> items = purchase.getItems().stream()
-                .map(item -> {
-                    PurchaseItemResponseDTO itemDTO = new PurchaseItemResponseDTO();
-                    itemDTO.setProductId(item.getProduct().getId());
-                    itemDTO.setProductName(item.getProduct().getName());
-                    itemDTO.setQuantity(item.getQuantity());
-                    itemDTO.setPricePerUnit(item.getPricePerUnit());
-                    itemDTO.setTaxAmount(item.getTaxAmount());
-                    return itemDTO;
-                })
-                .toList();
-
-        dto.setItems(items);
-        return dto;
-    }
 }
