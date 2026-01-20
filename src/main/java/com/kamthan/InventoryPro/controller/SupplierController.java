@@ -1,6 +1,7 @@
 package com.kamthan.InventoryPro.controller;
 
 import com.kamthan.InventoryPro.dto.ApiResponse;
+import com.kamthan.InventoryPro.dto.SupplierResponseDTO;
 import com.kamthan.InventoryPro.model.Supplier;
 import com.kamthan.InventoryPro.service.SupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,7 @@ public class SupplierController {
     private SupplierService supplierService;
 
     @PostMapping
-    public ApiResponse<Supplier> addSupplier(@RequestBody Supplier supplier) {
+    public ApiResponse<SupplierResponseDTO> addSupplier(@RequestBody Supplier supplier) {
         return new ApiResponse<>(
                 true,
                 "Supplier added successfully",
@@ -25,7 +26,7 @@ public class SupplierController {
     }
 
     @GetMapping
-    public ApiResponse<List<Supplier>> getAllSuppliers() {
+    public ApiResponse<List<SupplierResponseDTO>> getAllSuppliers() {
         return new ApiResponse<>(
                 true,
                 "Suppliers fetched successfully",
@@ -34,7 +35,7 @@ public class SupplierController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<Supplier> updateSupplier(@PathVariable Long id, @RequestBody Supplier supplier) {
+    public ApiResponse<SupplierResponseDTO> updateSupplier(@PathVariable("id") Long id, @RequestBody Supplier supplier) {
         return new ApiResponse<>(
                 true,
                 "Supplier updated successfully",
@@ -43,7 +44,7 @@ public class SupplierController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<Supplier> getSupplierById(@PathVariable Long id) {
+    public ApiResponse<SupplierResponseDTO> getSupplierById(@PathVariable("id") Long id) {
         return new ApiResponse<>(
                 true,
                 "Supplier details fetched successfully",
@@ -52,7 +53,7 @@ public class SupplierController {
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse<Void> deleteSupplier(@PathVariable Long id) {
+    public ApiResponse<Void> deleteSupplier(@PathVariable("id") Long id) {
         supplierService.deleteSupplier(id);
         return new ApiResponse<>(
                 true,
@@ -62,7 +63,7 @@ public class SupplierController {
     }
 
     @GetMapping("/search")
-    public ApiResponse<List<Supplier>> searchSuppliers(
+    public ApiResponse<List<SupplierResponseDTO>> searchSuppliers(
             @RequestParam(name = "name", required = false) String name,
             @RequestParam(name = "phone", required = false) String phone,
             @RequestParam(name = "email", required = false) String email,

@@ -1,6 +1,7 @@
 package com.kamthan.InventoryPro.controller;
 
 import com.kamthan.InventoryPro.dto.ApiResponse;
+import com.kamthan.InventoryPro.dto.CustomerResponseDTO;
 import com.kamthan.InventoryPro.model.Customer;
 import com.kamthan.InventoryPro.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,7 @@ public class CustomerController {
     private CustomerService customerService;
 
     @PostMapping
-    public ApiResponse<Customer> addCustomer(@RequestBody Customer customer) {
+    public ApiResponse<CustomerResponseDTO> addCustomer(@RequestBody Customer customer) {
         return new ApiResponse<>(
                 true,
                 "Customer added successfully",
@@ -25,7 +26,7 @@ public class CustomerController {
     }
 
     @GetMapping
-    public ApiResponse<List<Customer>> getAllCustomers() {
+    public ApiResponse<List<CustomerResponseDTO>> getAllCustomers() {
         return new ApiResponse<>(
                 true,
                 "Customers fetched successfully",
@@ -34,7 +35,7 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customer) {
+    public ApiResponse<CustomerResponseDTO> updateCustomer(@PathVariable("id") Long id, @RequestBody Customer customer) {
         return new ApiResponse<>(
                 true,
                 "Customer updated successfully",
@@ -43,7 +44,7 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<Customer> getCustomerById(@PathVariable Long id) {
+    public ApiResponse<CustomerResponseDTO> getCustomerById(@PathVariable("id") Long id) {
         return new ApiResponse<>(
                 true,
                 "Customer details fetched successfully",
@@ -52,7 +53,7 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse<Void> deleteCustomer(@PathVariable Long id) {
+    public ApiResponse<Void> deleteCustomer(@PathVariable("id") Long id) {
         customerService.deleteCustomer(id);
         return new ApiResponse<>(
                 true,
@@ -62,7 +63,7 @@ public class CustomerController {
     }
 
     @GetMapping("/search")
-    public ApiResponse<List<Customer>> searchCustomers(
+    public ApiResponse<List<CustomerResponseDTO>> searchCustomers(
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "phone", required = false) String phone,
             @RequestParam(value = "email", required = false) String email,

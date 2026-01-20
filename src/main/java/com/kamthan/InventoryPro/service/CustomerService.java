@@ -1,5 +1,6 @@
 package com.kamthan.InventoryPro.service;
 
+import com.kamthan.InventoryPro.dto.CustomerResponseDTO;
 import com.kamthan.InventoryPro.model.Customer;
 import com.kamthan.InventoryPro.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,14 +9,14 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 public interface CustomerService {
-    public Customer addCustomer(Customer customer);
+    public CustomerResponseDTO addCustomer(Customer customer);
 
-    public List<Customer> getAllCustomers();
+    public List<CustomerResponseDTO> getAllCustomers();
 
-    public Customer updateCustomer(Long id, Customer updatedCustomer);
+    public CustomerResponseDTO updateCustomer(Long id, Customer updatedCustomer);
 
-    public Customer getCustomerById(Long id);
+    public CustomerResponseDTO getCustomerById(Long id);
 
     public void deleteCustomer(Long id);
-    public List<Customer> searchCustomers(String name, String phone, String email, String gstNumber);
+    public List<CustomerResponseDTO> searchCustomers(String name, String phone, String email, String gstNumber);
 }
