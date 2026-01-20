@@ -1,6 +1,9 @@
 package com.kamthan.InventoryPro.service;
 
+import com.kamthan.InventoryPro.dto.SaleItemResponseDTO;
+import com.kamthan.InventoryPro.dto.SaleResponseDTO;
 import com.kamthan.InventoryPro.exception.InsufficientStockException;
+import com.kamthan.InventoryPro.exception.InvalidRequestException;
 import com.kamthan.InventoryPro.exception.ResourceNotFoundException;
 import com.kamthan.InventoryPro.model.Product;
 import com.kamthan.InventoryPro.model.Sale;
@@ -11,9 +14,12 @@ import com.kamthan.InventoryPro.model.enums.ReferenceType;
 import com.kamthan.InventoryPro.repository.ProductRepository;
 import com.kamthan.InventoryPro.repository.SaleRepository;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +34,9 @@ public class SaleService {
     private ProductRepository productRepository;
     @Autowired
     private StockMovementService stockMovementService;
+
+    Logger logger
+            = LoggerFactory.getLogger(SaleService.class);
 
     // add sale method
     @Transactional
@@ -119,5 +128,50 @@ public class SaleService {
 
     public List<Sale> getAllSales() {
         return saleRepository.findAll();
+    }
+
+    public List<SaleResponseDTO> getSalesByDateRange(LocalDate from, LocalDate to) {
+        if(from == null || to == null) {
+            throw new InvalidRequestException("From date and To date are required");
+        }
+        if(from.isAfter(to)) {
+            throw new InvalidRequestException("From date can not be after To date");
+        }
+
+        LocalDateTime start = from.atStartOfDay();
+        LocalDateTime end = to.atTime(23,59,59);
+
+        List<Sale> sales = saleRepository.findBySaleDateBetween(start, end);
+
+        if(sales.isEmpty()) throw new ResourceNotFoundException("No sales found between "+from+" and "+to);
+
+        return sales.stream()
+                .map(this::mapToSaleResponseDTO)
+                .toList();
+    }
+
+    public SaleResponseDTO mapToSaleResponseDTO(Sale sale) {
+        SaleResponseDTO dto = new SaleResponseDTO();
+
+        dto.setSaleId(sale.getId());
+        dto.setSaleDate(sale.getSaleDate());
+        dto.setTotalAmount(sale.getTotalAmount());
+        dto.setTotalTax(sale.getTaxAmount());
+
+        if(sale.getCustomer()!=null) dto.setCustomerName(sale.getCustomer().getName());
+
+        List<SaleItemResponseDTO> items = sale.getItems().stream()
+                .map(item-> {
+                    SaleItemResponseDTO itemDTO = new SaleItemResponseDTO();
+                    itemDTO.setProductId(item.getProduct().getId());
+                    itemDTO.setProductName(item.getProduct().getName());
+                    itemDTO.setQuantity(item.getQuantity());
+                    itemDTO.setPricePerUnit(item.getPricePerUnit());
+                    itemDTO.setTaxAmount(item.getTaxAmount());
+                    return itemDTO;
+                }).toList();
+
+        dto.setItems(items);
+        return dto;
     }
 }

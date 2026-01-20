@@ -19,4 +19,10 @@ public class GlobalExceptionHandler {
         ApiResponse<Void> response = new ApiResponse<>(false, e.getMessage(), null);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidRequestException(InvalidRequestException e) {
+        ApiResponse<Void> response = new ApiResponse<>(false, e.getMessage(), null);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 }
