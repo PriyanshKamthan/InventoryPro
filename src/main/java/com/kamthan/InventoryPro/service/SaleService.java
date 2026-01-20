@@ -5,6 +5,7 @@ import com.kamthan.InventoryPro.dto.SaleResponseDTO;
 import com.kamthan.InventoryPro.exception.InsufficientStockException;
 import com.kamthan.InventoryPro.exception.InvalidRequestException;
 import com.kamthan.InventoryPro.exception.ResourceNotFoundException;
+import com.kamthan.InventoryPro.mapper.SaleMapper;
 import com.kamthan.InventoryPro.model.Product;
 import com.kamthan.InventoryPro.model.Sale;
 import com.kamthan.InventoryPro.model.SaleItem;
@@ -30,13 +31,13 @@ import java.util.Map;
 public class SaleService {
     @Autowired
     private SaleRepository saleRepository;
+
+    @Autowired
+    private SaleMapper saleMapper;
     @Autowired
     private ProductRepository productRepository;
     @Autowired
     private StockMovementService stockMovementService;
-
-    Logger logger
-            = LoggerFactory.getLogger(SaleService.class);
 
     // add sale method
     @Transactional
@@ -146,32 +147,7 @@ public class SaleService {
         if(sales.isEmpty()) throw new ResourceNotFoundException("No sales found between "+from+" and "+to);
 
         return sales.stream()
-                .map(this::mapToSaleResponseDTO)
+                .map(saleMapper::toResponseDTO)
                 .toList();
-    }
-
-    public SaleResponseDTO mapToSaleResponseDTO(Sale sale) {
-        SaleResponseDTO dto = new SaleResponseDTO();
-
-        dto.setSaleId(sale.getId());
-        dto.setSaleDate(sale.getSaleDate());
-        dto.setTotalAmount(sale.getTotalAmount());
-        dto.setTotalTax(sale.getTaxAmount());
-
-        if(sale.getCustomer()!=null) dto.setCustomerName(sale.getCustomer().getName());
-
-        List<SaleItemResponseDTO> items = sale.getItems().stream()
-                .map(item-> {
-                    SaleItemResponseDTO itemDTO = new SaleItemResponseDTO();
-                    itemDTO.setProductId(item.getProduct().getId());
-                    itemDTO.setProductName(item.getProduct().getName());
-                    itemDTO.setQuantity(item.getQuantity());
-                    itemDTO.setPricePerUnit(item.getPricePerUnit());
-                    itemDTO.setTaxAmount(item.getTaxAmount());
-                    return itemDTO;
-                }).toList();
-
-        dto.setItems(items);
-        return dto;
     }
 }
