@@ -26,7 +26,7 @@ public class SaleController {
         );
     }
 
-    @GetMapping("/filter")
+    @GetMapping
     public ApiResponse<List<Sale>> getAllSales() {
         return new ApiResponse<>(
                 true,
@@ -34,7 +34,7 @@ public class SaleController {
                 saleService.getAllSales());
     }
 
-    @GetMapping
+    @GetMapping("/filter")
     public ApiResponse<List<SaleResponseDTO>> getSalesByDateRange(
             @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)LocalDate from,
             @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)LocalDate to) {

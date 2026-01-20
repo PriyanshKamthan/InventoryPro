@@ -1,5 +1,9 @@
 package com.kamthan.InventoryPro.service;
 
+import com.kamthan.InventoryPro.dto.PurchaseItemResponseDTO;
+import com.kamthan.InventoryPro.dto.PurchaseResponseDTO;
+import com.kamthan.InventoryPro.exception.InvalidRequestException;
+import com.kamthan.InventoryPro.exception.ResourceNotFoundException;
 import com.kamthan.InventoryPro.model.Product;
 import com.kamthan.InventoryPro.model.Purchase;
 import com.kamthan.InventoryPro.model.PurchaseItem;
@@ -12,6 +16,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -104,5 +109,62 @@ public class PurchaseService {
 
     public List<Purchase> getAllPurchases() {
         return purchaseRepository.findAll();
+    }
+
+    public List<PurchaseResponseDTO> getPurchasesByDateRange(
+            LocalDate from,
+            LocalDate to
+    ) {
+        if (from == null || to == null) {
+            throw new InvalidRequestException("From date and To date are required");
+        }
+
+        if (from.isAfter(to)) {
+            throw new InvalidRequestException("From date cannot be after To date");
+        }
+
+        LocalDateTime start = from.atStartOfDay();
+        LocalDateTime end = to.atTime(23, 59, 59);
+
+        List<Purchase> purchases =
+                purchaseRepository.findByPurchaseDateBetween(start, end);
+
+        if (purchases.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    "No purchases found between " + from + " and " + to
+            );
+        }
+
+        return purchases.stream()
+                .map(this::mapToPurchaseResponseDTO)
+                .toList();
+    }
+
+    private PurchaseResponseDTO mapToPurchaseResponseDTO(Purchase purchase) {
+        PurchaseResponseDTO dto = new PurchaseResponseDTO();
+
+        dto.setPurchaseId(purchase.getId());
+        dto.setPurchaseDate(purchase.getPurchaseDate());
+        dto.setTotalAmount(purchase.getTotalAmount());
+        dto.setTotalTax(purchase.getTaxAmount());
+
+        if (purchase.getSupplier() != null) {
+            dto.setSupplierName(purchase.getSupplier().getName());
+        }
+
+        List<PurchaseItemResponseDTO> items = purchase.getItems().stream()
+                .map(item -> {
+                    PurchaseItemResponseDTO itemDTO = new PurchaseItemResponseDTO();
+                    itemDTO.setProductId(item.getProduct().getId());
+                    itemDTO.setProductName(item.getProduct().getName());
+                    itemDTO.setQuantity(item.getQuantity());
+                    itemDTO.setPricePerUnit(item.getPricePerUnit());
+                    itemDTO.setTaxAmount(item.getTaxAmount());
+                    return itemDTO;
+                })
+                .toList();
+
+        dto.setItems(items);
+        return dto;
     }
 }

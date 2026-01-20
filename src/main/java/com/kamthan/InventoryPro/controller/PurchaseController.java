@@ -1,11 +1,14 @@
 package com.kamthan.InventoryPro.controller;
 
 import com.kamthan.InventoryPro.dto.ApiResponse;
+import com.kamthan.InventoryPro.dto.PurchaseResponseDTO;
 import com.kamthan.InventoryPro.model.Purchase;
 import com.kamthan.InventoryPro.service.PurchaseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -30,6 +33,20 @@ public class PurchaseController {
                 "Purchases fetched successfully",
                 purchaseService.getAllPurchases()
         );
+    }
+
+    @GetMapping("/filter")
+    public ApiResponse<List<PurchaseResponseDTO>> getPurchasesByDateRange(
+            @RequestParam("from")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+
+            @RequestParam("to")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
+    ) {
+        return new ApiResponse<>(
+                true,
+                "Purchases fetched successfully",
+                purchaseService.getPurchasesByDateRange(from, to));
     }
 
 //    @GetMapping("/{supplierId}")
