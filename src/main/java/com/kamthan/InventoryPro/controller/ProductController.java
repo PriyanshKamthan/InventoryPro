@@ -1,7 +1,7 @@
 package com.kamthan.InventoryPro.controller;
 
 import com.kamthan.InventoryPro.dto.ApiResponse;
-import com.kamthan.InventoryPro.dto.ProductSearchDTO;
+import com.kamthan.InventoryPro.dto.ProductResponseDTO;
 import com.kamthan.InventoryPro.model.Product;
 import com.kamthan.InventoryPro.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ public class ProductController {
     private ProductService productService;
 
     @PostMapping
-    public ApiResponse<Product> addProduct(@RequestBody Product product) {
+    public ApiResponse<ProductResponseDTO> addProduct(@RequestBody Product product) {
         return new ApiResponse<>(
                 true,
                 "Product added successfully",
@@ -26,7 +26,7 @@ public class ProductController {
     }
 
     @GetMapping
-    public ApiResponse<List<Product>> getAllProducts() {
+    public ApiResponse<List<ProductResponseDTO>> getAllProducts() {
         //return productService.getAllProducts();
         return new ApiResponse<>(
                 true,
@@ -36,7 +36,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<Product> getProductById(@PathVariable Long id) {
+    public ApiResponse<ProductResponseDTO> getProductById(@PathVariable("id") Long id) {
         return new ApiResponse<>(
                 true,
                 "Product details fetched successfully",
@@ -45,7 +45,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<Product> updateProduct(@PathVariable Long id, @RequestBody Product product) {
+    public ApiResponse<ProductResponseDTO> updateProduct(@PathVariable("id") Long id, @RequestBody Product product) {
         return new ApiResponse<>(
                 true,
                 "Product updated successfully",
@@ -54,7 +54,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse<Void> deleteProduct(@PathVariable Long id) {
+    public ApiResponse<Void> deleteProduct(@PathVariable("id") Long id) {
         productService.deleteProduct(id);
         return new ApiResponse<>(
                 true,
@@ -64,9 +64,9 @@ public class ProductController {
     }
 
     @GetMapping("/search")
-    public ApiResponse<List<ProductSearchDTO>> searchProducts(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String category) {
+    public ApiResponse<List<ProductResponseDTO>> searchProducts(
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "category", required = false) String category) {
         return new ApiResponse<>(true, "Products fetched successfully",
                 productService.searchProducts(name, category));
     }

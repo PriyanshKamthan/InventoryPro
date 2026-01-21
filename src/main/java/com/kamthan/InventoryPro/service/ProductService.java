@@ -1,8 +1,9 @@
 package com.kamthan.InventoryPro.service;
 
 import com.kamthan.InventoryPro.dto.ProductReportDTO;
-import com.kamthan.InventoryPro.dto.ProductSearchDTO;
+import com.kamthan.InventoryPro.dto.ProductResponseDTO;
 import com.kamthan.InventoryPro.exception.ResourceNotFoundException;
+import com.kamthan.InventoryPro.mapper.ProductMapper;
 import com.kamthan.InventoryPro.model.Product;
 import com.kamthan.InventoryPro.model.enums.UnitOfMeasure;
 import com.kamthan.InventoryPro.repository.ProductRepository;
@@ -17,31 +18,36 @@ import java.util.stream.Collectors;
 public class ProductService {
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private ProductMapper productMapper;
 
-    public Product addProduct(Product product) {
+    public ProductResponseDTO addProduct(Product product) {
         if (product.getUnitOfMeasure() == null) {
             product.setUnitOfMeasure(UnitOfMeasure.PIECE);
         }
-        return productRepository.save(product);
+        return productMapper.toResponseDTO(productRepository.save(product));
     }
 
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    public List<ProductResponseDTO> getAllProducts() {
+        return productRepository.findAll().stream()
+                .map(productMapper::toResponseDTO)
+                .toList();
     }
 
-    public Product findProductById(Long id) {
-        return productRepository.findById(id).orElseThrow(()->
+    public ProductResponseDTO findProductById(Long id) {
+        return productMapper.toResponseDTO(productRepository.findById(id).orElseThrow(()->
+                new ResourceNotFoundException("Product not found with id: "+id)));
+    }
+    public ProductResponseDTO updateProduct(Long id, Product updatedProduct) {
+        Product existing = productRepository.findById(id).orElseThrow(()->
                 new ResourceNotFoundException("Product not found with id: "+id));
-    }
-    public Product updateProduct(Long id, Product updatedProduct) {
-        Product existing = findProductById(id);
         if (existing != null) {
             existing.setName(updatedProduct.getName());
             existing.setCategory(updatedProduct.getCategory());
             existing.setPrice(updatedProduct.getPrice());
             existing.setQuantity(updatedProduct.getQuantity());
             existing.setUnitOfMeasure(updatedProduct.getUnitOfMeasure());
-            return productRepository.save(existing);
+            return productMapper.toResponseDTO(productRepository.save(existing));
         }
         return null;
     }
@@ -51,7 +57,7 @@ public class ProductService {
         productRepository.deleteById(id);
     }
 
-    public List<ProductSearchDTO> searchProducts(String name, String category) {
+    public List<ProductResponseDTO> searchProducts(String name, String category) {
         List<Product> products;
         if(name!=null && category!=null) {
             products = productRepository.findByNameContainingIgnoreCaseAndCategoryIgnoreCase(name, category);
@@ -60,16 +66,11 @@ public class ProductService {
         } else if(category!=null) {
             products = productRepository.findByCategoryIgnoreCase(category);
         } else {
-            products = getAllProducts();
+            return getAllProducts();
         }
 
-        return products.stream().map(
-                p -> new ProductSearchDTO(
-                        p.getId(),
-                        p.getName(),
-                        p.getCategory(),
-                        p.getQuantity(),
-                        p.getPrice()))
+        return products.stream()
+                .map(productMapper::toResponseDTO)
                 .toList();
     }
 

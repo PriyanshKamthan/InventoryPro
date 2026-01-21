@@ -1,21 +1,24 @@
 package com.kamthan.InventoryPro.dto;
 
-public class ProductSearchDTO {
+import java.time.LocalDateTime;
+
+public class ProductResponseDTO {
     private Long id;
     private String name;
     private String category;
     private Integer quantity;
     private Double price;
+    private String unitOfMeasure;
+    public ProductResponseDTO() {
+    }
 
-    public ProductSearchDTO(Long id, String name, String category, Integer quantity, Double price) {
+    public ProductResponseDTO(Long id, String name, String category, Integer quantity, Double price, String unitOfMeasure) {
         this.id = id;
         this.name = name;
         this.category = category;
         this.quantity = quantity;
         this.price = price;
-    }
-
-    public ProductSearchDTO() {
+        this.unitOfMeasure = unitOfMeasure;
     }
 
     public Long getId() {
@@ -58,14 +61,23 @@ public class ProductSearchDTO {
         this.price = price;
     }
 
+    public String getUnitOfMeasure() {
+        return unitOfMeasure;
+    }
+
+    public void setUnitOfMeasure(String unitOfMeasure) {
+        this.unitOfMeasure = unitOfMeasure;
+    }
+
     @Override
     public String toString() {
-        return "ProductSearchDTO{" +
+        return "ProductResponseDTO{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", category='" + category + '\'' +
                 ", quantity=" + quantity +
                 ", price=" + price +
+                ", uom='" + unitOfMeasure + '\'' +
                 '}';
     }
 }

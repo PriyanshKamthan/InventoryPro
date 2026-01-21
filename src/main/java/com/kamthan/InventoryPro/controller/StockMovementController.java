@@ -18,7 +18,7 @@ public class StockMovementController {
     private StockMovementService stockMovementService;
 
     @GetMapping("/product/{productId}")
-    public ApiResponse<List<StockMovement>> getForProduct(@PathVariable Long productId) {
+    public ApiResponse<List<StockMovement>> getForProduct(@PathVariable("productId") Long productId) {
         return new ApiResponse<>(
                 true,
                 "Stock movement of product fetched successfully",
