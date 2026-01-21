@@ -29,8 +29,21 @@ public class ProductService {
         if (product.getUnitOfMeasure() == null) {
             product.setUnitOfMeasure(UnitOfMeasure.PIECE);
         }
-        stockMovementService.recordMovement(product, MovementType.IN, product.getQuantity(), 0, product.getQuantity(), ReferenceType.MANUAL, (long)0);
-        return productMapper.toResponseDTO(productRepository.save(product));
+        int openingQty = product.getQuantity() != null ? product.getQuantity() : 0;
+        product.setQuantity(openingQty);
+        Product savedProduct = productRepository.save(product);
+        if (openingQty > 0) {
+            stockMovementService.recordMovement(
+                    savedProduct,
+                    MovementType.IN,
+                    openingQty,
+                    0,
+                    openingQty,
+                    ReferenceType.OPENING_STOCK,
+                    savedProduct.getId()
+            );
+        }
+        return productMapper.toResponseDTO(savedProduct);
     }
 
     public List<ProductResponseDTO> getAllProducts() {

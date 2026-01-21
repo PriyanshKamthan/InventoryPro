@@ -4,5 +4,5 @@ public enum ReferenceType {
     PURCHASE,
     SALE,
     ADJUSTMENT,
-    MANUAL
+    OPENING_STOCK
 }
