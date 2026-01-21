@@ -1,5 +1,6 @@
 package com.kamthan.InventoryPro.service;
 
+import com.kamthan.InventoryPro.dto.StockMovementResponseDTO;
 import com.kamthan.InventoryPro.model.Product;
 import com.kamthan.InventoryPro.model.StockMovement;
 import com.kamthan.InventoryPro.model.enums.MovementType;
@@ -16,5 +17,5 @@ public interface StockMovementService {
                                  ReferenceType referenceType,
                                  Long referenceId);
     void updateReferenceId(List<Long> stockMovementIdList, Long referenceId);
-    List<StockMovement> getMovementsForProduct(Long productId);
+    List<StockMovementResponseDTO> getMovementsForProduct(Long productId);
 }

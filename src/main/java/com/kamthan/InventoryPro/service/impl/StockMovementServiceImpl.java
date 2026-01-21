@@ -1,5 +1,7 @@
 package com.kamthan.InventoryPro.service.impl;
 
+import com.kamthan.InventoryPro.dto.StockMovementResponseDTO;
+import com.kamthan.InventoryPro.mapper.StockMovementMapper;
 import com.kamthan.InventoryPro.model.Product;
 import com.kamthan.InventoryPro.model.StockMovement;
 import com.kamthan.InventoryPro.model.enums.MovementType;
@@ -16,6 +18,8 @@ import java.util.List;
 public class StockMovementServiceImpl implements StockMovementService {
     @Autowired
     private StockMovementRepository stockMovementRepository;
+    @Autowired
+    private StockMovementMapper stockMovementMapper;
     @Override
     public StockMovement recordMovement(Product product, MovementType movementType, int quantity, int beforeQty, int afterQty, ReferenceType referenceType, Long referenceId) {
         StockMovement stockMovement = new StockMovement();
@@ -41,7 +45,9 @@ public class StockMovementServiceImpl implements StockMovementService {
         }
     }
     @Override
-    public List<StockMovement> getMovementsForProduct(Long productId) {
-        return stockMovementRepository.findByProductIdOrderByTimestampDesc(productId);
+    public List<StockMovementResponseDTO> getMovementsForProduct(Long productId) {
+        return stockMovementRepository.findByProductIdOrderByTimestampDesc(productId).stream()
+                .map(stockMovementMapper::toResponseDTO)
+                .toList();
     }
 }

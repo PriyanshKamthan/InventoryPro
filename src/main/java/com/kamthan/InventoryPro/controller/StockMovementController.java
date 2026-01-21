@@ -1,6 +1,7 @@
 package com.kamthan.InventoryPro.controller;
 
 import com.kamthan.InventoryPro.dto.ApiResponse;
+import com.kamthan.InventoryPro.dto.StockMovementResponseDTO;
 import com.kamthan.InventoryPro.model.StockMovement;
 import com.kamthan.InventoryPro.service.StockMovementService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ public class StockMovementController {
     private StockMovementService stockMovementService;
 
     @GetMapping("/product/{productId}")
-    public ApiResponse<List<StockMovement>> getForProduct(@PathVariable("productId") Long productId) {
+    public ApiResponse<List<StockMovementResponseDTO>> getForProduct(@PathVariable("productId") Long productId) {
         return new ApiResponse<>(
                 true,
                 "Stock movement of product fetched successfully",

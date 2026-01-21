@@ -5,6 +5,8 @@ import com.kamthan.InventoryPro.dto.ProductResponseDTO;
 import com.kamthan.InventoryPro.exception.ResourceNotFoundException;
 import com.kamthan.InventoryPro.mapper.ProductMapper;
 import com.kamthan.InventoryPro.model.Product;
+import com.kamthan.InventoryPro.model.enums.MovementType;
+import com.kamthan.InventoryPro.model.enums.ReferenceType;
 import com.kamthan.InventoryPro.model.enums.UnitOfMeasure;
 import com.kamthan.InventoryPro.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +22,14 @@ public class ProductService {
     private ProductRepository productRepository;
     @Autowired
     private ProductMapper productMapper;
+    @Autowired
+    private StockMovementService stockMovementService;
 
     public ProductResponseDTO addProduct(Product product) {
         if (product.getUnitOfMeasure() == null) {
             product.setUnitOfMeasure(UnitOfMeasure.PIECE);
         }
+        stockMovementService.recordMovement(product, MovementType.IN, product.getQuantity(), 0, product.getQuantity(), ReferenceType.MANUAL, (long)0);
         return productMapper.toResponseDTO(productRepository.save(product));
     }
 
