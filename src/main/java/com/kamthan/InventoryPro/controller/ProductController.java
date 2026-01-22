@@ -63,6 +63,15 @@ public class ProductController {
         );
     }
 
+    @PutMapping("/{id}/restore")
+    public ApiResponse<Void> restoreProduct(@PathVariable Long id) {
+        productService.restoreProduct(id);
+        return new ApiResponse<>(
+                true,
+                "Product restored successfully",
+                null);
+    }
+
     @GetMapping("/search")
     public ApiResponse<List<ProductResponseDTO>> searchProducts(
             @RequestParam(value = "name", required = false) String name,

@@ -2,8 +2,14 @@ package com.kamthan.InventoryPro.model;
 
 import com.kamthan.InventoryPro.model.enums.UnitOfMeasure;
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
+import java.time.LocalDateTime;
 
 @Entity
+@SQLDelete(sql = "UPDATE product SET is_active = false, deleted_at = now() WHERE id = ?")
+@Where(clause = "is_active = true")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,7 +23,10 @@ public class Product {
     @Column(name = "unit_of_measure")
     private UnitOfMeasure unitOfMeasure;
 
-    // getters and setters
+    @Column(nullable = false)
+    private Boolean isActive = true;
+
+    private LocalDateTime deletedAt;
 
     public Product() {
     }
@@ -77,6 +86,22 @@ public class Product {
 
     public void setUnitOfMeasure(UnitOfMeasure unitOfMeasure) {
         this.unitOfMeasure = unitOfMeasure;
+    }
+
+    public Boolean getActive() {
+        return isActive;
+    }
+
+    public void setActive(Boolean active) {
+        isActive = active;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
 
     @Override

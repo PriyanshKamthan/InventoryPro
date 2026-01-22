@@ -11,6 +11,7 @@ import com.kamthan.InventoryPro.model.enums.MovementType;
 import com.kamthan.InventoryPro.model.enums.ReferenceType;
 import com.kamthan.InventoryPro.model.enums.UnitOfMeasure;
 import com.kamthan.InventoryPro.repository.ProductRepository;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -98,7 +99,7 @@ public class ProductService {
     }
 
     public void deleteProduct(Long id) {
-        log.info("Deleting product with id={}",id);
+        log.info("Soft deleting product | id={}", id);
 
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> {
@@ -109,6 +110,23 @@ public class ProductService {
         productRepository.delete(product);
 
         log.info("Product deleted successfully, id={}", id);
+    }
+
+    @Transactional
+    public void restoreProduct(Long id) {
+        Product product = productRepository.findByIdIncludingDeleted(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+        if (Boolean.TRUE.equals(product.getActive())) {
+            throw new InvalidRequestException("Product is already active");
+        }
+
+        product.setActive(true);
+        product.setDeletedAt(null);
+
+        productRepository.save(product);
+
+        log.info("Product restored | id={}", id);
     }
 
     public List<ProductResponseDTO> searchProducts(String name, String category) {
