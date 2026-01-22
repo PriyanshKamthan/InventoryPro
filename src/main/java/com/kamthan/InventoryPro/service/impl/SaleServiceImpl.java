@@ -15,6 +15,7 @@ import com.kamthan.InventoryPro.repository.SaleRepository;
 import com.kamthan.InventoryPro.service.SaleService;
 import com.kamthan.InventoryPro.service.StockMovementService;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class SaleServiceImpl implements SaleService {
 
@@ -41,12 +43,18 @@ public class SaleServiceImpl implements SaleService {
     @Override
     @Transactional
     public Sale addSale(Sale sale) {
+
+        log.info("Sale initiated | customerId={} | itemsCount={}",
+                sale.getCustomer() != null ? sale.getCustomer().getId() : null,
+                sale.getItems() != null ? sale.getItems().size() : 0);
+
         double totalAmount = 0.0;
         double totalTax = 0.0;
 
         // validate items
         if (sale.getItems() == null || sale.getItems().isEmpty()) {
-            throw new IllegalArgumentException("Sale must contain at least one item");
+            log.error("Sale failed | no sale items provided");
+            throw new InvalidRequestException("Sale must contain at least one item");
         }
 
         // cache products to avoid multiple DB hits
@@ -56,20 +64,26 @@ public class SaleServiceImpl implements SaleService {
         for (SaleItem item : sale.getItems()) {
             Long productId = item.getProduct() == null ? null : item.getProduct().getId();
             if (productId == null) {
-                throw new ResourceNotFoundException("Product id is required for each sale item");
+                log.error("Sale failed | missing product in sale item");
+                throw new InvalidRequestException("Product id is required for each sale item");
             }
 
             Product product = productCache.computeIfAbsent(productId,
-                    id -> productRepository.findById(id)
-                            .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id)));
+                    id -> productRepository.findById(id).orElseThrow(() -> {
+                        log.warn("Sale failed | Product not found with id:{}", id);
+                        return new ResourceNotFoundException("Product not found with id: " + id);
+                    }));
 
             if (item.getQuantity() == null || item.getQuantity() <= 0) {
+                log.warn("Invalid sale quantity | productId={} | qty={}", productId, item.getQuantity());
                 throw new InsufficientStockException("Quantity must be > 0 for product id: " + productId);
             }
 
             int available = product.getQuantity() == null ? 0 : product.getQuantity();
             int qty = item.getQuantity();
             if (available < qty) {
+                log.error("Sale failed | Insufficient stock for product id: {} Available:{}, requested: {}"
+                        , productId, available, qty);
                 throw new InsufficientStockException("Insufficient stock for product id: " + productId +
                         ". Available: " + available + ", requested: " + qty);
             }
@@ -94,6 +108,8 @@ public class SaleServiceImpl implements SaleService {
             // associate item with sale (so cascade persists items)
             item.setSale(sale);
         }
+
+        log.info("Sale calculated | totalAmount={} | totalTax={}", totalAmount, totalTax);
 
         sale.setTotalAmount(totalAmount);
         sale.setTaxAmount(totalTax);
@@ -123,31 +139,44 @@ public class SaleServiceImpl implements SaleService {
             );
         }
 
+        log.info("Sale saved successfully | saleId={} | customerId={}",
+                savedSale.getId(), savedSale.getCustomer() != null ? savedSale.getCustomer().getId() : null
+        );
         return savedSale;
     }
 
     @Override
-    public List<Sale> getAllSales() {
-        return saleRepository.findAll();
+    public List<SaleResponseDTO> getAllSales() {
+        log.info("Fetching all sale");
+        return saleRepository.findAll().stream()
+                .map(saleMapper::toResponseDTO)
+                .toList();
     }
 
     @Override
     public List<SaleResponseDTO> getSalesByDateRange(LocalDate from, LocalDate to) {
-        if(from == null || to == null) {
+        log.info("Fetching sale from:{} to:{}", from, to);
+        if (from == null || to == null) {
+            log.warn("Sale: From date and To date are required");
             throw new InvalidRequestException("From date and To date are required");
         }
-        if(from.isAfter(to)) {
+        if (from.isAfter(to)) {
+            log.warn("Sale: From date cannot be after To date");
             throw new InvalidRequestException("From date can not be after To date");
         }
 
         LocalDateTime start = from.atStartOfDay();
-        LocalDateTime end = to.atTime(23,59,59);
+        LocalDateTime end = to.atTime(23, 59, 59);
 
-        List<Sale> sales = saleRepository.findBySaleDateBetween(start, end);
+        List<Sale> saleList = saleRepository.findBySaleDateBetween(start, end);
 
-        if(sales.isEmpty()) throw new ResourceNotFoundException("No sales found between "+from+" and "+to);
+        if (saleList.isEmpty()) {
+            log.warn("No sale found between from:{} and to:{}", from, to);
+            throw new ResourceNotFoundException("No sale found between " + from + " and " + to);
+        }
 
-        return sales.stream()
+        log.info("Sale fetched successfully, size():{}",saleList.size());
+        return saleList.stream()
                 .map(saleMapper::toResponseDTO)
                 .toList();
     }

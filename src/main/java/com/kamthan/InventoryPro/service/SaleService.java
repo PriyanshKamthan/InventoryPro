@@ -11,7 +11,7 @@ public interface SaleService {
     @Transactional
     public Sale addSale(Sale sale);
 
-    public List<Sale> getAllSales();
+    public List<SaleResponseDTO> getAllSales();
 
     public List<SaleResponseDTO> getSalesByDateRange(LocalDate from, LocalDate to);
 }

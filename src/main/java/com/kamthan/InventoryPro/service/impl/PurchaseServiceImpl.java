@@ -39,16 +39,15 @@ public class PurchaseServiceImpl implements PurchaseService {
     @Override
     @Transactional
     public Purchase addPurchase(Purchase purchase) {
-        log.info(
-                "Purchase initiated | supplierId={} | itemsCount={}",
+        log.info("Purchase initiated | supplierId={} | itemsCount={}",
                 purchase.getSupplier() != null ? purchase.getSupplier().getId() : null,
-                purchase.getItems() != null ? purchase.getItems().size() : 0
-        );
+                purchase.getItems() != null ? purchase.getItems().size() : 0);
 
         double totalAmount = 0.0;
         double totalTax = 0.0;
 
         if (purchase.getItems() == null || purchase.getItems().isEmpty()) {
+            log.error("Purchase failed | no purchase items provided");
             throw new InvalidRequestException("Purchase must contain at least one item");
         }
 
@@ -67,8 +66,10 @@ public class PurchaseServiceImpl implements PurchaseService {
 
 
             Product product = productCache.computeIfAbsent(productId,
-                    id -> productRepository.findById(id)
-                            .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id)));
+                    id -> productRepository.findById(id).orElseThrow(() -> {
+                                log.warn("Product not found with id:{}",id);
+                                return new ResourceNotFoundException("Product not found with id: " + id);
+                            }));
 
             if (item.getQuantity() == null || item.getQuantity() <= 0) {
                 log.warn("Invalid purchase quantity | productId={} | qty={}", productId, item.getQuantity());
@@ -159,9 +160,7 @@ public class PurchaseServiceImpl implements PurchaseService {
 
         if (purchaseList.isEmpty()) {
             log.warn("No purchase found between from:{} and to:{}", from, to);
-            throw new ResourceNotFoundException(
-                    "No purchase found between " + from + " and " + to
-            );
+            throw new ResourceNotFoundException("No purchase found between " + from + " and " + to);
         }
 
         log.info("Purchase fetched successfully, size():{}",purchaseList.size());

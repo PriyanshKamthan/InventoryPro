@@ -27,7 +27,7 @@ public class SaleController {
     }
 
     @GetMapping
-    public ApiResponse<List<Sale>> getAllSales() {
+    public ApiResponse<List<SaleResponseDTO>> getAllSales() {
         return new ApiResponse<>(
                 true,
                 "Sales fetched successfully",
