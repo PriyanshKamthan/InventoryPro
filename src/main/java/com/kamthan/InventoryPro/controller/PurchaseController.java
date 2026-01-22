@@ -27,7 +27,7 @@ public class PurchaseController {
     }
 
     @GetMapping
-    public ApiResponse<List<Purchase>> getAllPurchases() {
+    public ApiResponse<List<PurchaseResponseDTO>> getAllPurchases() {
         return new ApiResponse<>(
                 true,
                 "Purchases fetched successfully",

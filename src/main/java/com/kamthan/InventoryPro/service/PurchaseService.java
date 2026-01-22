@@ -9,7 +9,7 @@ import java.util.List;
 public interface PurchaseService {
     public Purchase addPurchase(Purchase purchase);
 
-    public List<Purchase> getAllPurchases();
+    public List<PurchaseResponseDTO> getAllPurchases();
 
     public List<PurchaseResponseDTO> getPurchasesByDateRange(LocalDate from, LocalDate to);
 }

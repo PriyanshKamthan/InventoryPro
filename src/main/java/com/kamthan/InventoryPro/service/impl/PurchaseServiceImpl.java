@@ -14,6 +14,7 @@ import com.kamthan.InventoryPro.repository.PurchaseRepository;
 import com.kamthan.InventoryPro.service.PurchaseService;
 import com.kamthan.InventoryPro.service.StockMovementService;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class PurchaseServiceImpl implements PurchaseService {
     @Autowired
@@ -37,11 +39,17 @@ public class PurchaseServiceImpl implements PurchaseService {
     @Override
     @Transactional
     public Purchase addPurchase(Purchase purchase) {
+        log.info(
+                "Purchase initiated | supplierId={} | itemsCount={}",
+                purchase.getSupplier() != null ? purchase.getSupplier().getId() : null,
+                purchase.getItems() != null ? purchase.getItems().size() : 0
+        );
+
         double totalAmount = 0.0;
         double totalTax = 0.0;
 
         if (purchase.getItems() == null || purchase.getItems().isEmpty()) {
-            throw new IllegalArgumentException("Purchase must contain at least one item");
+            throw new InvalidRequestException("Purchase must contain at least one item");
         }
 
         Map<Long, Product> productCache = new HashMap<>();
@@ -49,15 +57,22 @@ public class PurchaseServiceImpl implements PurchaseService {
         for (PurchaseItem item : purchase.getItems()) {
             Long productId = item.getProduct().getId();
             if (productId == null) {
-                throw new IllegalArgumentException("Product id is required for each purchase item");
+                log.error("Purchase failed | Product id is required for each purchase item");
+                throw new InvalidRequestException("Product id is required for each purchase item");
             }
+
+            log.info(
+                    "Processing purchase item | productId={} | qty={} | pricePerUnit={} | taxPerUnit={}",
+                    item.getProduct().getId(), item.getQuantity(), item.getPricePerUnit(), item.getTaxAmount());
+
 
             Product product = productCache.computeIfAbsent(productId,
                     id -> productRepository.findById(id)
-                            .orElseThrow(() -> new RuntimeException("Product not found with id: " + id)));
+                            .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id)));
 
             if (item.getQuantity() == null || item.getQuantity() <= 0) {
-                throw new IllegalArgumentException("Quantity must be > 0 for product id: " + productId);
+                log.warn("Invalid purchase quantity | productId={} | qty={}", productId, item.getQuantity());
+                throw new InvalidRequestException("Quantity must be > 0 for product id: " + productId);
             }
 
             int before = product.getQuantity() == null ? 0 : product.getQuantity();
@@ -79,6 +94,8 @@ public class PurchaseServiceImpl implements PurchaseService {
 
             item.setPurchase(purchase);
         }
+
+        log.info("Purchase calculated | totalAmount={} | totalTax={}", totalAmount, totalTax);
 
         purchase.setTotalAmount(totalAmount);
         purchase.setTaxAmount(totalTax);
@@ -107,37 +124,48 @@ public class PurchaseServiceImpl implements PurchaseService {
             );
         }
 
+        log.info("Purchase saved successfully | purchaseId={} | supplierId={}",
+                savedPurchase.getId(), savedPurchase.getSupplier() != null ? savedPurchase.getSupplier().getId() : null);
+
         return savedPurchase;
     }
 
     @Override
-    public List<Purchase> getAllPurchases() {
-        return purchaseRepository.findAll();
+    public List<PurchaseResponseDTO> getAllPurchases() {
+        log.info("Fetching all purchase");
+        return purchaseRepository.findAll().stream()
+                .map(purchaseMapper::toResponseDTO)
+                .toList();
     }
 
     @Override
     public List<PurchaseResponseDTO> getPurchasesByDateRange(LocalDate from, LocalDate to) {
+        log.info("Fetching purchase from:{} to:{}", from, to);
         if (from == null || to == null) {
+            log.warn("Purchase: From date and To date are required");
             throw new InvalidRequestException("From date and To date are required");
         }
 
         if (from.isAfter(to)) {
+            log.warn("Purchase: From date cannot be after To date");
             throw new InvalidRequestException("From date cannot be after To date");
         }
 
         LocalDateTime start = from.atStartOfDay();
         LocalDateTime end = to.atTime(23, 59, 59);
 
-        List<Purchase> purchases =
+        List<Purchase> purchaseList =
                 purchaseRepository.findByPurchaseDateBetween(start, end);
 
-        if (purchases.isEmpty()) {
+        if (purchaseList.isEmpty()) {
+            log.warn("No purchase found between from:{} and to:{}", from, to);
             throw new ResourceNotFoundException(
-                    "No purchases found between " + from + " and " + to
+                    "No purchase found between " + from + " and " + to
             );
         }
 
-        return purchases.stream()
+        log.info("Purchase fetched successfully, size():{}",purchaseList.size());
+        return purchaseList.stream()
                 .map(purchaseMapper::toResponseDTO)
                 .toList();
     }
