@@ -7,10 +7,12 @@ import com.kamthan.InventoryPro.mapper.PurchaseMapper;
 import com.kamthan.InventoryPro.model.Product;
 import com.kamthan.InventoryPro.model.Purchase;
 import com.kamthan.InventoryPro.model.PurchaseItem;
+import com.kamthan.InventoryPro.model.Supplier;
 import com.kamthan.InventoryPro.model.enums.MovementType;
 import com.kamthan.InventoryPro.model.enums.ReferenceType;
 import com.kamthan.InventoryPro.repository.ProductRepository;
 import com.kamthan.InventoryPro.repository.PurchaseRepository;
+import com.kamthan.InventoryPro.repository.SupplierRepository;
 import com.kamthan.InventoryPro.service.PurchaseService;
 import com.kamthan.InventoryPro.service.StockMovementService;
 import jakarta.transaction.Transactional;
@@ -34,6 +36,8 @@ public class PurchaseServiceImpl implements PurchaseService {
     @Autowired
     private ProductRepository productRepository;
     @Autowired
+    private SupplierRepository supplierRepository;
+    @Autowired
     private StockMovementService stockMovementService;
 
     @Override
@@ -42,6 +46,24 @@ public class PurchaseServiceImpl implements PurchaseService {
         log.info("Purchase initiated | supplierId={} | itemsCount={}",
                 purchase.getSupplier() != null ? purchase.getSupplier().getId() : null,
                 purchase.getItems() != null ? purchase.getItems().size() : 0);
+
+        Long supplierId = purchase.getSupplier() != null ? purchase.getSupplier().getId() : null;
+        if (supplierId == null) {
+            throw new InvalidRequestException("Supplier is required");
+        }
+
+        Supplier supplier = supplierRepository.findByIdIncludingDeleted(supplierId)
+                .orElseThrow(() -> {
+                    log.error("Supplier not found");
+                    return new ResourceNotFoundException("Supplier not found");
+                });
+
+        if (!supplier.getActive()) {
+            log.warn("Supplier is inactive");
+            throw new InvalidRequestException("Supplier is inactive");
+        }
+
+        purchase.setSupplier(supplier);
 
         double totalAmount = 0.0;
         double totalTax = 0.0;
@@ -87,8 +109,8 @@ public class PurchaseServiceImpl implements PurchaseService {
                     : item.getPricePerUnit() * qty * 0.1;
             item.setTaxAmount(tax);
 
-            totalTax += tax;
-            totalAmount += item.getPricePerUnit() * qty + tax;
+            totalTax += tax * qty;
+            totalAmount += (item.getPricePerUnit() + tax) * qty;
 
             product.setQuantity(before + qty);
             productCache.put(productId, product);

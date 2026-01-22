@@ -62,6 +62,15 @@ public class CustomerController {
         );
     }
 
+    @PutMapping("/{id}/restore")
+    public ApiResponse<Void> restoreCustomer(@PathVariable Long id) {
+        customerService.restoreCustomer(id);
+        return new ApiResponse(
+                true,
+                "Customer restored successfully",
+                null);
+    }
+
     @GetMapping("/search")
     public ApiResponse<List<CustomerResponseDTO>> searchCustomers(
             @RequestParam(value = "name", required = false) String name,

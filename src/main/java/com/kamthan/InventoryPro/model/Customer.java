@@ -1,14 +1,15 @@
 package com.kamthan.InventoryPro.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
 
 @Entity
+@SQLDelete(sql = "UPDATE customer SET is_active = false, deleted_at = now() WHERE id = ?")
+@Where(clause = "is_active = true")
 public class Customer {
 
     @Id
@@ -20,7 +21,9 @@ public class Customer {
     private String phone;
     private String address;
     private String gstNumber;
-
+    @Column(nullable = false)
+    private Boolean isActive = true;
+    private LocalDateTime deletedAt;
     @CreationTimestamp
     private LocalDateTime createdAt;
 
@@ -36,6 +39,7 @@ public class Customer {
         this.gstNumber = gstNumber;
         this.createdAt = createdAt;
     }
+
     public Long getId() {
         return id;
     }
@@ -90,6 +94,22 @@ public class Customer {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Boolean getActive() {
+        return isActive;
+    }
+
+    public void setActive(Boolean active) {
+        isActive = active;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
 
     @Override

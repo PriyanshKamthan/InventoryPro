@@ -5,11 +5,13 @@ import com.kamthan.InventoryPro.exception.InsufficientStockException;
 import com.kamthan.InventoryPro.exception.InvalidRequestException;
 import com.kamthan.InventoryPro.exception.ResourceNotFoundException;
 import com.kamthan.InventoryPro.mapper.SaleMapper;
+import com.kamthan.InventoryPro.model.Customer;
 import com.kamthan.InventoryPro.model.Product;
 import com.kamthan.InventoryPro.model.Sale;
 import com.kamthan.InventoryPro.model.SaleItem;
 import com.kamthan.InventoryPro.model.enums.MovementType;
 import com.kamthan.InventoryPro.model.enums.ReferenceType;
+import com.kamthan.InventoryPro.repository.CustomerRepository;
 import com.kamthan.InventoryPro.repository.ProductRepository;
 import com.kamthan.InventoryPro.repository.SaleRepository;
 import com.kamthan.InventoryPro.service.SaleService;
@@ -37,6 +39,8 @@ public class SaleServiceImpl implements SaleService {
     @Autowired
     private ProductRepository productRepository;
     @Autowired
+    private CustomerRepository customerRepository;
+    @Autowired
     private StockMovementService stockMovementService;
 
     // add sale method
@@ -47,6 +51,19 @@ public class SaleServiceImpl implements SaleService {
         log.info("Sale initiated | customerId={} | itemsCount={}",
                 sale.getCustomer() != null ? sale.getCustomer().getId() : null,
                 sale.getItems() != null ? sale.getItems().size() : 0);
+
+        Long customerId = sale.getCustomer() != null ? sale.getCustomer().getId() : null;
+
+        if (customerId == null) {
+            throw new InvalidRequestException("Customer is required");
+        }
+
+        Customer customer = customerRepository.findByIdIncludingDeleted(customerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+        if (!customer.getActive()) {
+            throw new InvalidRequestException("Customer is inactive");
+        }
+        sale.setCustomer(customer);
 
         double totalAmount = 0.0;
         double totalTax = 0.0;
@@ -98,8 +115,8 @@ public class SaleServiceImpl implements SaleService {
                     : item.getPricePerUnit() * qty * 0.1;
             item.setTaxAmount(tax);
 
-            totalTax += tax;
-            totalAmount += item.getPricePerUnit() * qty + tax;
+            totalTax += tax * qty;
+            totalAmount += (item.getPricePerUnit() + tax) * qty;
 
             // update product quantity in cache (decrement)
             product.setQuantity(available - qty);

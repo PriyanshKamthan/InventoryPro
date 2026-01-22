@@ -1,16 +1,20 @@
 package com.kamthan.InventoryPro.service.impl;
 
 import com.kamthan.InventoryPro.dto.CustomerResponseDTO;
+import com.kamthan.InventoryPro.exception.InvalidRequestException;
 import com.kamthan.InventoryPro.exception.ResourceNotFoundException;
 import com.kamthan.InventoryPro.mapper.CustomerMapper;
 import com.kamthan.InventoryPro.model.Customer;
 import com.kamthan.InventoryPro.repository.CustomerRepository;
 import com.kamthan.InventoryPro.service.CustomerService;
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class CustomerServiceImpl implements CustomerService {
     @Autowired
@@ -49,9 +53,27 @@ public class CustomerServiceImpl implements CustomerService {
         return null;
     }
 
+    @Transactional
     public void deleteCustomer(Long id) {
         getCustomerById(id);
         customerRepository.deleteById(id);
+        log.info("Customer soft deleted | id={}", id);
+    }
+
+    @Transactional
+    public void restoreCustomer(Long id) {
+        Customer customer = customerRepository.findByIdIncludingDeleted(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+
+        if (customer.getActive()) {
+            throw new InvalidRequestException("Customer is already active");
+        }
+
+        customer.setActive(true);
+        customer.setDeletedAt(null);
+
+        customerRepository.save(customer);
+        log.info("Customer restored | id={}", id);
     }
 
     @Override

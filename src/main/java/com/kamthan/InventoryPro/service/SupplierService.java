@@ -16,5 +16,7 @@ public interface SupplierService {
 
     void deleteSupplier(Long id);
 
+    public void restoreSupplier(Long id);
+
     List<SupplierResponseDTO> searchSuppliers(String name, String phone, String email, String gstNumber);
 }

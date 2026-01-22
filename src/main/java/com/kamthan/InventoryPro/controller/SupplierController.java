@@ -61,6 +61,15 @@ public class SupplierController {
                 null
         );
     }
+    @PutMapping("/{id}/restore")
+    public ApiResponse<Void> restoreSupplier(@PathVariable Long id) {
+        supplierService.restoreSupplier(id);
+        return new ApiResponse(
+                true,
+                "Supplier restored successfully",
+                null);
+    }
+
 
     @GetMapping("/search")
     public ApiResponse<List<SupplierResponseDTO>> searchSuppliers(
