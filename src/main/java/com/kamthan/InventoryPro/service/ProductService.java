@@ -9,6 +9,7 @@ import com.kamthan.InventoryPro.model.enums.MovementType;
 import com.kamthan.InventoryPro.model.enums.ReferenceType;
 import com.kamthan.InventoryPro.model.enums.UnitOfMeasure;
 import com.kamthan.InventoryPro.repository.ProductRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ProductService {
     @Autowired
@@ -40,13 +42,14 @@ public class ProductService {
                     0,
                     openingQty,
                     ReferenceType.OPENING_STOCK,
-                    savedProduct.getId()
+                    null
             );
         }
         return productMapper.toResponseDTO(savedProduct);
     }
 
     public List<ProductResponseDTO> getAllProducts() {
+        log.info("Test: Lombok logging is working");
         return productRepository.findAll().stream()
                 .map(productMapper::toResponseDTO)
                 .toList();
