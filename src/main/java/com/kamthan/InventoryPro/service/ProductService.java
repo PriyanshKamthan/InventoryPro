@@ -43,8 +43,6 @@ public class ProductService {
         Product savedProduct = productRepository.save(product);
 
         if (openingQty > 0) {
-            log.info("Adding StockMovement: productName={}, afterQty{}, referenceType={}",
-                    savedProduct.getName(), openingQty, ReferenceType.OPENING_STOCK);
             StockMovement sm =
                     stockMovementService.recordMovement(
                             savedProduct,
@@ -55,7 +53,6 @@ public class ProductService {
                             ReferenceType.OPENING_STOCK,
                             null
                     );
-            log.info("StockMovement added successfully with id={}", sm.getId());
         }
 
         log.info("Product added successfully with id={}", savedProduct.getId());

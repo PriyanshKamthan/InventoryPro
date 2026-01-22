@@ -16,6 +16,5 @@ public interface StockMovementService {
                                  int afterQty,
                                  ReferenceType referenceType,
                                  Long referenceId);
-    void updateReferenceId(List<Long> stockMovementIdList, Long referenceId);
     List<StockMovementResponseDTO> getMovementsForProduct(Long productId);
 }
