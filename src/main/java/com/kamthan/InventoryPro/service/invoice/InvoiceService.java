@@ -1,4 +1,4 @@
-package com.kamthan.InventoryPro.service;
+package com.kamthan.InventoryPro.service.invoice;
 
 import com.kamthan.InventoryPro.config.CompanyProperties;
 import com.kamthan.InventoryPro.dto.invoice.CompanyInfoDTO;
@@ -59,7 +59,7 @@ public class InvoiceService {
 
         invoice.setCustomer(customerDto);
 
-        log.debug("Customer info attached | customerName={}", customer.getName());
+        log.info("Customer info attached | customerName={}", customer.getName());
 
         //Setting Items
         List<InvoiceItemDTO> items = new ArrayList<>();
