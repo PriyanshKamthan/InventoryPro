@@ -19,4 +19,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query(value = "SELECT * FROM product WHERE id = :id", nativeQuery = true)
     Optional<Product> findByIdIncludingDeleted(@Param("id") Long id);
+
+    @Query("""
+       SELECT 
+         COUNT(p.id),
+         COALESCE(SUM(p.quantity), 0)
+       FROM Product p
+       WHERE p.isActive = true
+    """)
+    Object fetchStockSummary();
 }
