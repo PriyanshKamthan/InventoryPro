@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/purchase")
 public class PurchaseController {
     @Autowired

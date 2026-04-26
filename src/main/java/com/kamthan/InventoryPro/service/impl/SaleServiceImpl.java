@@ -46,7 +46,7 @@ public class SaleServiceImpl implements SaleService {
     // add sale method
     @Override
     @Transactional
-    public Sale addSale(Sale sale) {
+    public SaleResponseDTO addSale(Sale sale) {
 
         log.info("Sale initiated | customerId={} | itemsCount={}",
                 sale.getCustomer() != null ? sale.getCustomer().getId() : null,
@@ -159,7 +159,7 @@ public class SaleServiceImpl implements SaleService {
         log.info("Sale saved successfully | saleId={} | customerId={}",
                 savedSale.getId(), savedSale.getCustomer() != null ? savedSale.getCustomer().getId() : null
         );
-        return savedSale;
+        return saleMapper.toResponseDTO(savedSale);
     }
 
     @Override

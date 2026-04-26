@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface SaleService {
     @Transactional
-    public Sale addSale(Sale sale);
+    public SaleResponseDTO addSale(Sale sale);
 
     public List<SaleResponseDTO> getAllSales();
 

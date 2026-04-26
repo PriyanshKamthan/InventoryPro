@@ -4,14 +4,12 @@ import com.kamthan.InventoryPro.dto.ApiResponse;
 import com.kamthan.InventoryPro.dto.dashboard.*;
 import com.kamthan.InventoryPro.service.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/dashboard")
 public class DashboardController {
 
@@ -41,7 +39,7 @@ public class DashboardController {
 
     @GetMapping("/recent-stock-movement")
     public ApiResponse<List<RecentStockMovementDTO>> getRecentStockMovements(
-            @RequestParam(defaultValue = "10") int limit
+            @RequestParam(defaultValue = "8") int limit
     ) {
         return new ApiResponse<>(true,
                 "Recent stock movement fetched successfully",

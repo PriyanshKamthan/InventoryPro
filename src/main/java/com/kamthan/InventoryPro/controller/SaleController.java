@@ -12,13 +12,14 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/sale")
 public class SaleController {
     @Autowired
     private SaleService saleService;
 
     @PostMapping
-    public ApiResponse<Sale> addSale(@RequestBody Sale sale) {
+    public ApiResponse<SaleResponseDTO> addSale(@RequestBody Sale sale) {
         return new ApiResponse<>(
                 true,
                 "Sale added successfully",
