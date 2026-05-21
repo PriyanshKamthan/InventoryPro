@@ -24,6 +24,7 @@ public class StockMovement {
     private Integer quantity;
     private Integer beforeQty;
     private Integer afterQty;
+    @Enumerated(EnumType.STRING)
     private ReferenceType referenceType;
     private Long referenceId;
     private LocalDateTime timestamp;

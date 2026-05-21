@@ -163,6 +163,64 @@ public class SaleServiceImpl implements SaleService {
     }
 
     @Override
+    @Transactional
+    public void reverseSale(Long saleId) {
+
+        log.info("Reverse sale initiated | saleId={}", saleId);
+
+        Sale sale = saleRepository.findById(saleId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Sale not found with id: " + saleId));
+
+        if (Boolean.TRUE.equals(sale.isReversed())) {
+            throw new InvalidRequestException("Sale is already reversed");
+        }
+
+        if (sale.getItems() == null || sale.getItems().isEmpty()) {
+            throw new InvalidRequestException("Sale has no items to reverse");
+        }
+
+        Map<Long, Product> productCache = new HashMap<>();
+
+        for (SaleItem item : sale.getItems()) {
+
+            Long productId = item.getProduct().getId();
+
+            log.info("Reversing sale item | productId={} | qty={}",
+                    productId, item.getQuantity());
+
+            Product product = productCache.computeIfAbsent(productId,
+                    id -> productRepository.findById(id)
+                            .orElseThrow(() ->
+                                    new ResourceNotFoundException("Product not found with id: " + id)));
+
+            int before = product.getQuantity() == null ? 0 : product.getQuantity();
+            int qty = item.getQuantity();
+            int after = before + qty;
+
+            product.setQuantity(after);
+            productCache.put(productId, product);
+
+            stockMovementService.recordMovement(
+                    product,
+                    MovementType.IN,
+                    qty,
+                    before,
+                    after,
+                    ReferenceType.SALE_REVERSAL,
+                    sale.getId()
+            );
+        }
+
+        productRepository.saveAll(productCache.values());
+
+        sale.setReversed(true);
+        saleRepository.save(sale);
+
+        log.info("Sale reversed successfully | saleId={}", saleId);
+    }
+
+    @Override
     public List<SaleResponseDTO> getAllSales() {
         log.info("Fetching all sale");
         return saleRepository.findAll().stream()

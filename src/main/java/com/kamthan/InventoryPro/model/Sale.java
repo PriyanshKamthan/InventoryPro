@@ -13,6 +13,7 @@ public class Sale {
     private LocalDateTime saleDate;
     private Double totalAmount;
     private Double taxAmount;
+    private boolean isReversed;
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;
@@ -22,11 +23,12 @@ public class Sale {
     public Sale() {
     }
 
-    public Sale(Long id, LocalDateTime saleDate, Double totalAmount, Double taxAmount, Customer customer, List<SaleItem> items) {
+    public Sale(Long id, LocalDateTime saleDate, Double totalAmount, Double taxAmount, boolean isReversed, Customer customer, List<SaleItem> items) {
         this.id = id;
         this.saleDate = saleDate;
         this.totalAmount = totalAmount;
         this.taxAmount = taxAmount;
+        this.isReversed = isReversed;
         this.customer = customer;
         this.items = items;
     }
@@ -79,6 +81,13 @@ public class Sale {
     public void setItems(List<SaleItem> items) {
         this.items = items;
     }
+    public boolean isReversed() {
+        return isReversed;
+    }
+
+    public void setReversed(boolean reversed) {
+        isReversed = reversed;
+    }
 
     @Override
     public String toString() {
@@ -87,7 +96,8 @@ public class Sale {
                 ", saleDate=" + saleDate +
                 ", totalAmount=" + totalAmount +
                 ", taxAmount=" + taxAmount +
-                ", customer='" + customer + '\'' +
+                ", isReversed=" + isReversed +
+                ", customer=" + customer +
                 ", items=" + items +
                 '}';
     }

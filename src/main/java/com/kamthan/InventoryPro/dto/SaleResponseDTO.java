@@ -9,17 +9,19 @@ public class SaleResponseDTO {
     private String customerName;
     private Double totalAmount;
     private Double totalTax;
+    private boolean isReversed;
     private List<SaleItemResponseDTO> items;
 
     public SaleResponseDTO() {
     }
 
-    public SaleResponseDTO(Long saleId, LocalDateTime saleDate, String customerName, Double totalAmount, Double totalTax, List<SaleItemResponseDTO> items) {
+    public SaleResponseDTO(Long saleId, LocalDateTime saleDate, String customerName, Double totalAmount, Double totalTax, boolean isReversed, List<SaleItemResponseDTO> items) {
         this.saleId = saleId;
         this.saleDate = saleDate;
         this.customerName = customerName;
         this.totalAmount = totalAmount;
         this.totalTax = totalTax;
+        this.isReversed = isReversed;
         this.items = items;
     }
 
@@ -41,6 +43,10 @@ public class SaleResponseDTO {
 
     public Double getTotalTax() {
         return totalTax;
+    }
+
+    public boolean isReversed() {
+        return isReversed;
     }
 
     public List<SaleItemResponseDTO> getItems() {
@@ -66,11 +72,12 @@ public class SaleResponseDTO {
     public void setTotalTax(Double totalTax) {
         this.totalTax = totalTax;
     }
-
+    public void setReversed(boolean reversed) {
+        isReversed = reversed;
+    }
     public void setItems(List<SaleItemResponseDTO> items) {
         this.items = items;
     }
-
     @Override
     public String toString() {
         return "SaleResponseDTO{" +
@@ -79,6 +86,7 @@ public class SaleResponseDTO {
                 ", customerName='" + customerName + '\'' +
                 ", totalAmount=" + totalAmount +
                 ", totalTax=" + totalTax +
+                ", isReversed=" + isReversed +
                 ", items=" + items +
                 '}';
     }

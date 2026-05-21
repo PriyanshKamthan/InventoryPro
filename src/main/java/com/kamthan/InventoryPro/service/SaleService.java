@@ -14,4 +14,6 @@ public interface SaleService {
     public List<SaleResponseDTO> getAllSales();
 
     public List<SaleResponseDTO> getSalesByDateRange(LocalDate from, LocalDate to);
+
+    public void reverseSale(Long saleId);
 }

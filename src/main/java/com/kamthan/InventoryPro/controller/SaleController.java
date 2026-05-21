@@ -27,6 +27,12 @@ public class SaleController {
         );
     }
 
+    @PostMapping("/{saleId}/reverse")
+    public ApiResponse<String> reverseSale(@PathVariable("saleId") long saleId) {
+        saleService.reverseSale(saleId);
+        return new ApiResponse<>(true, "Sale got reversed", null);
+    }
+
     @GetMapping
     public ApiResponse<List<SaleResponseDTO>> getAllSales() {
         return new ApiResponse<>(
