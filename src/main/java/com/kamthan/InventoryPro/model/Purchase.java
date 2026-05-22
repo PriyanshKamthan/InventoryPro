@@ -19,6 +19,8 @@ public class Purchase {
 
     @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL)
     private List<PurchaseItem> items;
+    @Column(nullable = false)
+    private Boolean isReversed;
 
     // getters and setters
 
@@ -82,6 +84,13 @@ public class Purchase {
         this.supplier = supplier;
     }
 
+    public Boolean getReversed() {
+        return isReversed;
+    }
+
+    public void setReversed(Boolean reversed) {
+        isReversed = reversed;
+    }
     @Override
     public String toString() {
         return "Purchase{" +
@@ -89,8 +98,9 @@ public class Purchase {
                 ", purchaseDate=" + purchaseDate +
                 ", totalAmount=" + totalAmount +
                 ", taxAmount=" + taxAmount +
-                ", seller='" + supplier + '\'' +
+                ", supplier=" + supplier +
                 ", items=" + items +
+                ", isReversed=" + isReversed +
                 '}';
     }
 }

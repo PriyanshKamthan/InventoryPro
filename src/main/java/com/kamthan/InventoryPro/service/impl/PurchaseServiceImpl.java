@@ -154,6 +154,77 @@ public class PurchaseServiceImpl implements PurchaseService {
     }
 
     @Override
+    @Transactional
+    public void reversePurchase(Long purchaseId) {
+
+        log.info("Reverse purchase initiated | purchaseId={}", purchaseId);
+
+        Purchase purchase = purchaseRepository.findById(purchaseId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Purchase not found with id: " + purchaseId));
+
+        if (Boolean.TRUE.equals(purchase.getReversed())) {
+            throw new InvalidRequestException(
+                    "Purchase is already reversed");
+        }
+
+        if (purchase.getItems() == null || purchase.getItems().isEmpty()) {
+            throw new InvalidRequestException(
+                    "Purchase has no items to reverse");
+        }
+
+        Map<Long, Product> productCache = new HashMap<>();
+
+        for (PurchaseItem item : purchase.getItems()) {
+
+            Long productId = item.getProduct().getId();
+
+            log.info("Reversing purchase item | productId={} | qty={}",
+                    productId, item.getQuantity());
+
+            Product product = productCache.computeIfAbsent(
+                    productId,
+                    id -> productRepository.findById(id)
+                            .orElseThrow(() ->
+                                    new ResourceNotFoundException(
+                                            "Product not found with id: " + id))
+            );
+
+            int before = product.getQuantity() == null ? 0 : product.getQuantity();
+            int qty = item.getQuantity();
+            if (before < qty) {
+                throw new InvalidRequestException(
+                        "Cannot reverse purchase. Insufficient stock for product: "
+                                + product.getName());
+            }
+
+            int after = before - qty;
+
+            product.setQuantity(after);
+            productCache.put(productId, product);
+
+            stockMovementService.recordMovement(
+                    product,
+                    MovementType.OUT,
+                    qty,
+                    before,
+                    after,
+                    ReferenceType.PURCHASE_REVERSAL,
+                    purchase.getId()
+            );
+        }
+
+        productRepository.saveAll(productCache.values());
+
+        purchase.setReversed(true);
+        purchaseRepository.save(purchase);
+
+        log.info("Purchase reversed successfully | purchaseId={}", purchaseId
+        );
+    }
+
+    @Override
     public List<PurchaseResponseDTO> getAllPurchases() {
         log.info("Fetching all purchase");
         return purchaseRepository.findAll().stream()

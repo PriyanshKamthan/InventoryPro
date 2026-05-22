@@ -12,4 +12,5 @@ public interface PurchaseService {
     public List<PurchaseResponseDTO> getAllPurchases();
 
     public List<PurchaseResponseDTO> getPurchasesByDateRange(LocalDate from, LocalDate to);
+    public void reversePurchase(Long purchaseId);
 }

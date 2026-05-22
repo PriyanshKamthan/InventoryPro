@@ -5,5 +5,6 @@ public enum ReferenceType {
     SALE,
     ADJUSTMENT,
     OPENING_STOCK,
-    SALE_REVERSAL
+    SALE_REVERSAL,
+    PURCHASE_REVERSAL
 }

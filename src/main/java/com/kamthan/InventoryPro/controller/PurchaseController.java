@@ -50,6 +50,13 @@ public class PurchaseController {
                 purchaseService.getPurchasesByDateRange(from, to));
     }
 
+    @PostMapping("/{id}/reverse")
+    public ApiResponse<Void> reversePurchase(
+            @PathVariable Long id) {
+        purchaseService.reversePurchase(id);
+        return new ApiResponse<>(true, "Purchase reversed successfully", null);
+    }
+
 //    @GetMapping("/{supplierId}")
 //    public List<Purchase> getPurchasesOfSupplier(@PathVariable Long supplierId){
 //        return null;
