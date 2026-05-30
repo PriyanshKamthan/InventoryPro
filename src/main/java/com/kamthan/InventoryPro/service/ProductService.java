@@ -14,6 +14,7 @@ import com.kamthan.InventoryPro.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -98,6 +99,7 @@ public class ProductService {
         return productMapper.toResponseDTO(saved);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteProduct(Long id) {
         log.info("Soft deleting product | id={}", id);
 
@@ -113,6 +115,7 @@ public class ProductService {
     }
 
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public void restoreProduct(Long id) {
         Product product = productRepository.findByIdIncludingDeleted(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));

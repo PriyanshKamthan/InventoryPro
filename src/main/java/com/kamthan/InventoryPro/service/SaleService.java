@@ -3,6 +3,7 @@ package com.kamthan.InventoryPro.service;
 import com.kamthan.InventoryPro.dto.SaleResponseDTO;
 import com.kamthan.InventoryPro.model.Sale;
 import jakarta.transaction.Transactional;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,5 +16,6 @@ public interface SaleService {
 
     public List<SaleResponseDTO> getSalesByDateRange(LocalDate from, LocalDate to);
 
+    @PreAuthorize("hasRole('ADMIN')")
     public void reverseSale(Long saleId);
 }
