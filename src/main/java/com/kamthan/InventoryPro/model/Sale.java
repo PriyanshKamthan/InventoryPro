@@ -13,7 +13,8 @@ public class Sale {
     private LocalDateTime saleDate;
     private Double totalAmount;
     private Double taxAmount;
-    private boolean isReversed;
+    @Column(nullable = false)
+    private Boolean isReversed = false;
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;

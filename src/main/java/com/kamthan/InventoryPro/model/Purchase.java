@@ -20,7 +20,7 @@ public class Purchase {
     @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL)
     private List<PurchaseItem> items;
     @Column(nullable = false)
-    private Boolean isReversed;
+    private Boolean isReversed = false;
 
     // getters and setters
 
