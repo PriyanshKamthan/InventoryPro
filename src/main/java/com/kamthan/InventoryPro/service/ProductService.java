@@ -1,5 +1,6 @@
 package com.kamthan.InventoryPro.service;
 
+import com.kamthan.InventoryPro.dto.PageResponse;
 import com.kamthan.InventoryPro.dto.ProductReportDTO;
 import com.kamthan.InventoryPro.dto.ProductResponseDTO;
 import com.kamthan.InventoryPro.exception.InvalidRequestException;
@@ -14,6 +15,9 @@ import com.kamthan.InventoryPro.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -130,6 +134,51 @@ public class ProductService {
         productRepository.save(product);
 
         log.info("Product restored | id={}", id);
+    }
+
+    public PageResponse<ProductResponseDTO> getProducts(int page, int size) {
+        log.info("Fetching products: page={}, size={}", page, size);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Product> productPage =
+                productRepository.findAll(pageable);
+
+        List<ProductResponseDTO> products =
+                productPage.getContent()
+                        .stream()
+                        .map(productMapper::toResponseDTO)
+                        .toList();
+
+        return new PageResponse<>(
+                products,
+                productPage.getTotalElements(),
+                productPage.getTotalPages(),
+                productPage.getNumber()
+        );
+    }
+
+    public PageResponse<ProductResponseDTO> searchProductsPaged(String keyword, int page, int size) {
+        log.info("Searching products | keyword={} | page={} | size={}", keyword, page, size);
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Product> productPage;
+        if (keyword == null || keyword.isBlank()) {
+            productPage = productRepository.findAll(pageable);
+        } else {
+            productPage = productRepository
+                    .findByNameContainingIgnoreCaseOrCategoryContainingIgnoreCase(keyword, keyword, pageable);
+        }
+
+        List<ProductResponseDTO> content = productPage.getContent()
+                        .stream()
+                        .map(productMapper::toResponseDTO)
+                        .toList();
+
+        return new PageResponse<>(
+                content,
+                productPage.getTotalElements(),
+                productPage.getTotalPages(),
+                productPage.getNumber()
+        );
     }
 
     public List<ProductResponseDTO> searchProducts(String name, String category) {

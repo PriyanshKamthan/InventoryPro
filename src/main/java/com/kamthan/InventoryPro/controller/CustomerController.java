@@ -2,6 +2,7 @@ package com.kamthan.InventoryPro.controller;
 
 import com.kamthan.InventoryPro.dto.ApiResponse;
 import com.kamthan.InventoryPro.dto.CustomerResponseDTO;
+import com.kamthan.InventoryPro.dto.PageResponse;
 import com.kamthan.InventoryPro.model.Customer;
 import com.kamthan.InventoryPro.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +83,36 @@ public class CustomerController {
                 true,
                 "Customers fetched successfully",
                 customerService.searchCustomers(name, phone, email, gstNumber)
+        );
+    }
+
+    @GetMapping("/paged")
+    public ApiResponse<PageResponse<CustomerResponseDTO>>
+    getCustomersPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return new ApiResponse<>(
+                true,
+                "Customers fetched successfully",
+                customerService.getCustomers(page, size)
+        );
+    }
+    @GetMapping("/search/paged")
+    public ApiResponse<PageResponse<CustomerResponseDTO>>
+    searchCustomersPaged(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return new ApiResponse<>(
+                true,
+                "Customers fetched successfully",
+                customerService.searchCustomersPaged(
+                        keyword,
+                        page,
+                        size
+                )
         );
     }
 }

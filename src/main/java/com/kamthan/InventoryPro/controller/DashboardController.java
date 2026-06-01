@@ -39,7 +39,7 @@ public class DashboardController {
 
     @GetMapping("/recent-stock-movement")
     public ApiResponse<List<RecentStockMovementDTO>> getRecentStockMovements(
-            @RequestParam(defaultValue = "8") int limit
+            @RequestParam(defaultValue = "5") int limit
     ) {
         return new ApiResponse<>(true,
                 "Recent stock movement fetched successfully",

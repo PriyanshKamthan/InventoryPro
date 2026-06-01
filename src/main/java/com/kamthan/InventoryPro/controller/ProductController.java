@@ -1,6 +1,7 @@
 package com.kamthan.InventoryPro.controller;
 
 import com.kamthan.InventoryPro.dto.ApiResponse;
+import com.kamthan.InventoryPro.dto.PageResponse;
 import com.kamthan.InventoryPro.dto.ProductResponseDTO;
 import com.kamthan.InventoryPro.model.Product;
 import com.kamthan.InventoryPro.service.ProductService;
@@ -32,6 +33,36 @@ public class ProductController {
                 true,
                 "All Products fetched successfully",
                 productService.getAllProducts()
+        );
+    }
+
+    @GetMapping("/paged")
+    public ApiResponse<PageResponse<ProductResponseDTO>>
+    getProductsPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return new ApiResponse<>(
+                true,
+                "Products fetched successfully",
+                productService.getProducts(page, size)
+        );
+    }
+
+    @GetMapping("/search/paged")
+    public ApiResponse<PageResponse<ProductResponseDTO>> searchProductsPaged(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return new ApiResponse<>(
+                true,
+                "Products fetched successfully",
+                productService.searchProductsPaged(
+                        keyword,
+                        page,
+                        size
+                )
         );
     }
 

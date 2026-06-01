@@ -1,6 +1,8 @@
 package com.kamthan.InventoryPro.repository;
 
 import com.kamthan.InventoryPro.model.Customer;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,6 +17,9 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     List<Customer> findByEmailContainingIgnoreCase(String email);
     List<Customer> findByGstNumberContainingIgnoreCase(String gstNumber);
     List<Customer> findByPhoneContaining(String phone);
+    Page<Customer> findByNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrGstNumberContainingIgnoreCaseOrPhoneContaining(
+            String name, String email, String gstNumber, String phone, Pageable pageable
+    );
     @Query(value = "SELECT * FROM customer WHERE id = :id", nativeQuery = true)
     Optional<Customer> findByIdIncludingDeleted(@Param("id") Long id);
 

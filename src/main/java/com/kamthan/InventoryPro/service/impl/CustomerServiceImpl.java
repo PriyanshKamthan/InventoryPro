@@ -1,6 +1,7 @@
 package com.kamthan.InventoryPro.service.impl;
 
 import com.kamthan.InventoryPro.dto.CustomerResponseDTO;
+import com.kamthan.InventoryPro.dto.PageResponse;
 import com.kamthan.InventoryPro.exception.InvalidRequestException;
 import com.kamthan.InventoryPro.exception.ResourceNotFoundException;
 import com.kamthan.InventoryPro.mapper.CustomerMapper;
@@ -10,6 +11,9 @@ import com.kamthan.InventoryPro.service.CustomerService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -103,5 +107,57 @@ public class CustomerServiceImpl implements CustomerService {
                     .toList();
         }
         return getAllCustomers();
+    }
+
+    @Override
+    public PageResponse<CustomerResponseDTO> getCustomers(int page, int size) {
+        log.info("Fetching customers: page={}, size={}", page, size);
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Customer> customerPage = customerRepository.findAll(pageable);
+
+        List<CustomerResponseDTO> content = customerPage.getContent()
+                        .stream()
+                        .map(customerMapper::toResponseDTO)
+                        .toList();
+
+        return new PageResponse<>(
+                content,
+                customerPage.getTotalElements(),
+                customerPage.getTotalPages(),
+                customerPage.getNumber()
+        );
+    }
+    @Override
+    public PageResponse<CustomerResponseDTO> searchCustomersPaged(String keyword, int page, int size) {
+        log.info("Searching customers | keyword={} | page={} | size={}", keyword, page, size);
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Customer> customerPage;
+
+        if (keyword == null || keyword.isBlank()) {
+            customerPage = customerRepository.findAll(pageable);
+        } else {
+            customerPage = customerRepository
+                            .findByNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrGstNumberContainingIgnoreCaseOrPhoneContaining(
+                                    keyword,
+                                    keyword,
+                                    keyword,
+                                    keyword,
+                                    pageable
+                            );
+        }
+
+        List<CustomerResponseDTO> content = customerPage.getContent()
+                        .stream()
+                        .map(customerMapper::toResponseDTO)
+                        .toList();
+
+        return new PageResponse<>(
+                content,
+                customerPage.getTotalElements(),
+                customerPage.getTotalPages(),
+                customerPage.getNumber()
+        );
     }
 }

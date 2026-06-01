@@ -1,6 +1,8 @@
 package com.kamthan.InventoryPro.repository;
 
 import com.kamthan.InventoryPro.model.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,6 +19,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findByNameContainingIgnoreCaseAndCategoryIgnoreCase(String name, String category);
 
+    Page<Product> findByNameContainingIgnoreCaseOrCategoryContainingIgnoreCase(
+            String name,
+            String category,
+            Pageable pageable
+    );
     @Query(value = "SELECT * FROM product WHERE id = :id", nativeQuery = true)
     Optional<Product> findByIdIncludingDeleted(@Param("id") Long id);
 

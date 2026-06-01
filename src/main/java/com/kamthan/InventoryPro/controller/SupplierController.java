@@ -1,6 +1,7 @@
 package com.kamthan.InventoryPro.controller;
 
 import com.kamthan.InventoryPro.dto.ApiResponse;
+import com.kamthan.InventoryPro.dto.PageResponse;
 import com.kamthan.InventoryPro.dto.SupplierResponseDTO;
 import com.kamthan.InventoryPro.model.Supplier;
 import com.kamthan.InventoryPro.service.SupplierService;
@@ -81,6 +82,34 @@ public class SupplierController {
                 true,
                 "Suppliers fetched successfully",
                 supplierService.searchSuppliers(name, phone, email, gstNumber)
+        );
+    }
+
+    @GetMapping("/paged")
+    public ApiResponse<PageResponse<SupplierResponseDTO>> getSuppliersPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return new ApiResponse<>(
+                true,
+                "Suppliers fetched successfully",
+                supplierService.getSuppliers(page, size)
+        );
+    }
+    @GetMapping("/search/paged")
+    public ApiResponse<PageResponse<SupplierResponseDTO>> searchSuppliersPaged(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return new ApiResponse<>(
+                true,
+                "Suppliers fetched successfully",
+                supplierService.searchSuppliersPaged(
+                        keyword,
+                        page,
+                        size
+                )
         );
     }
 }

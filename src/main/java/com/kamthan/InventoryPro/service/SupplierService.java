@@ -1,5 +1,6 @@
 package com.kamthan.InventoryPro.service;
 
+import com.kamthan.InventoryPro.dto.PageResponse;
 import com.kamthan.InventoryPro.dto.SupplierResponseDTO;
 import com.kamthan.InventoryPro.model.Supplier;
 
@@ -19,4 +20,8 @@ public interface SupplierService {
     public void restoreSupplier(Long id);
 
     List<SupplierResponseDTO> searchSuppliers(String name, String phone, String email, String gstNumber);
+
+    PageResponse<SupplierResponseDTO> getSuppliers(int page, int size);
+
+    PageResponse<SupplierResponseDTO> searchSuppliersPaged(String keyword, int page, int size);
 }

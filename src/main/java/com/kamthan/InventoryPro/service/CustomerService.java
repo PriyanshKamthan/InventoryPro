@@ -1,6 +1,7 @@
 package com.kamthan.InventoryPro.service;
 
 import com.kamthan.InventoryPro.dto.CustomerResponseDTO;
+import com.kamthan.InventoryPro.dto.PageResponse;
 import com.kamthan.InventoryPro.model.Customer;
 
 import java.util.List;
@@ -19,4 +20,8 @@ public interface CustomerService {
     public void restoreCustomer(Long id);
 
     public List<CustomerResponseDTO> searchCustomers(String name, String phone, String email, String gstNumber);
+
+    PageResponse<CustomerResponseDTO> getCustomers(int page, int size);
+
+    PageResponse<CustomerResponseDTO> searchCustomersPaged(String keyword, int page, int size);
 }

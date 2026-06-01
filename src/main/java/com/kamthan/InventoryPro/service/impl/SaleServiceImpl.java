@@ -112,7 +112,7 @@ public class SaleServiceImpl implements SaleService {
 
             // compute tax if not provided (default 10%)
             double tax = item.getTaxAmount() != null ? item.getTaxAmount()
-                    : item.getPricePerUnit() * qty * 0.1;
+                    : item.getPricePerUnit() * 0.1;
             item.setTaxAmount(tax);
 
             totalTax += tax * qty;

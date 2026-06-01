@@ -1,5 +1,6 @@
 package com.kamthan.InventoryPro.service.impl;
 
+import com.kamthan.InventoryPro.dto.PageResponse;
 import com.kamthan.InventoryPro.dto.SupplierResponseDTO;
 import com.kamthan.InventoryPro.exception.InvalidRequestException;
 import com.kamthan.InventoryPro.exception.ResourceNotFoundException;
@@ -10,6 +11,9 @@ import com.kamthan.InventoryPro.service.SupplierService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -107,5 +111,42 @@ public class SupplierServiceImpl implements SupplierService {
                     .toList();
         }
         return getAllSuppliers();
+    }
+    @Override
+    public PageResponse<SupplierResponseDTO> getSuppliers(int page, int size) {
+        log.info("Fetching suppliers: page={}, size={}", page, size);
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Supplier> supplierPage = supplierRepository.findAll(pageable);
+
+        List<SupplierResponseDTO> content = supplierPage.getContent()
+                        .stream()
+                        .map(supplierMapper::toResponseDTO)
+                        .toList();
+
+        return new PageResponse<>(content, supplierPage.getTotalElements(), supplierPage.getTotalPages(), supplierPage.getNumber());
+    }
+    @Override
+    public PageResponse<SupplierResponseDTO> searchSuppliersPaged(String keyword, int page, int size) {
+        log.info("Searching suppliers | keyword={} | page={} | size={}", keyword, page, size);
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Supplier> supplierPage;
+
+        if (keyword == null || keyword.isBlank()) {
+            supplierPage = supplierRepository.findAll(pageable);
+        } else {
+            supplierPage = supplierRepository
+                            .findByNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrGstNumberContainingIgnoreCaseOrPhoneContaining(
+                                    keyword, keyword, keyword, keyword, pageable
+                            );
+        }
+
+        List<SupplierResponseDTO> content = supplierPage.getContent()
+                        .stream()
+                        .map(supplierMapper::toResponseDTO)
+                        .toList();
+
+        return new PageResponse<>(content, supplierPage.getTotalElements(), supplierPage.getTotalPages(), supplierPage.getNumber());
     }
 }
